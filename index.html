@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Franc - Moteur de Recherche & Actu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-light: #eff6ff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --transition: cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Barre supérieure */
+        .top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 20px 40px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .login-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+            transition: var(--transition);
+        }
+
+        .login-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* En-tête / Logo */
+        header {
+            margin-top: 2vh;
+            text-align: center;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .logo-link {
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .logo-link:hover .logo { transform: scale(1.02); }
+        .logo span { color: var(--primary); }
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        /* Barre de recherche */
+        .search-container {
+            width: 90%;
+            max-width: 650px;
+            margin-top: 35px;
+            position: relative;
+            animation: scaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
+        }
+
+        .search-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 5px 15px;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .search-wrapper:focus-within {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 10px;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .search-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
+
+        /* Aperçu Intelligent de Recherche */
+        .smart-preview {
+            display: none;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            padding: 20px 25px;
+            box-shadow: var(--shadow);
+            border-left: 6px solid var(--primary);
+            margin-top: 25px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            width: 100%;
+            max-width: 750px;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideIn 0.4s forwards ease;
+        }
+
+        .preview-details { display: flex; align-items: center; gap: 20px; }
+
+        .preview-icon-box {
+            width: 60px; height: 60px; background: white; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .preview-icon-box i { animation: pulse 1.5s infinite alternate; }
+
+        .preview-tag {
+            font-size: 0.75rem; text-transform: uppercase; font-weight: 700;
+            color: var(--primary); background: var(--primary-light);
+            padding: 4px 10px; border-radius: 50px; display: inline-block; margin-bottom: 5px;
+        }
+
+        .preview-title { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+        .preview-desc { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
+
+        .preview-link-btn {
+            background: white; color: var(--text-main); text-decoration: none;
+            padding: 10px 18px; border-radius: 50px; font-size: 0.85rem; font-weight: 600;
+            border: 1px solid #e2e8f0; white-space: nowrap; display: flex; align-items: center; gap: 8px;
+            transition: var(--transition);
+        }
+        .preview-link-btn:hover { background: var(--primary); color: white; border-color: var(--primary); transform: translateX(3px); }
+
+        /* Zone de résultats */
+        .results-container {
+            width: 90%; max-width: 750px; margin-top: 20px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .loader {
+            display: none; text-align: center; font-size: 2rem; color: var(--primary); margin-top: 20px;
+        }
+        .loader i { animation: spin 1s linear infinite; }
+
+        /* Section Actualités */
+        .news-section {
+            width: 90%; max-width: 950px; margin: 60px 0 40px 0;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .news-section h2 {
+            font-size: 1.8rem; margin-bottom: 25px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .news-section h2 i { color: #ef4444; animation: pulse 1s infinite alternate; }
+        
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+
+        .news-card {
+            background: var(--card-bg); border-radius: 16px; overflow: hidden;
+            box-shadow: var(--shadow); cursor: pointer; transition: var(--transition);
+            display: flex; flex-direction: column; min-height: 380px;
+        }
+        .news-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); }
+        
+        .news-img-wrapper { width: 100%; height: 180px; overflow: hidden; background-color: #e2e8f0; }
+        .news-img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); }
+        .news-card:hover .news-img { transform: scale(1.06); }
+        
+        .news-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .news-source { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+        .news-title { font-size: 1.05rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; color: var(--text-main); }
+        .news-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* NOUVEAUTÉ : Pied de page (Style Qwant) */
+        footer {
+            width: 100%;
+            background: var(--card-bg);
+            border-top: 1px solid #e2e8f0;
+            padding: 25px 40px;
+            margin-top: auto; /* Pousse le footer vers le bas si la page est vide */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-left span strong {
+            color: var(--text-main);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--text-main);
+            transform: scale(1.1);
+        }
+
+        .made-in {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .made-in i {
+            color: #ef4444;
+        }
+
+        /* Modales */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: var(--card-bg); width: 90%; max-width: 700px; max-height: 85vh;
+            border-radius: 24px; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.9) translateY(20px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .modal.active .modal-content { transform: scale(1) translateY(0); }
+
+        .modal-close {
+            position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.9);
+            border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: var(--transition); z-index: 11;
+        }
+        .modal-close:hover { transform: rotate(90deg); background: #ef4444; color: white; }
+        .modal-img { width: 100%; height: 320px; object-fit: cover; background-color: #e2e8f0; }
+        .modal-body { padding: 30px; }
+        .modal-body h3 { font-size: 1.5rem; margin: 10px 0 15px 0; line-height: 1.4; }
+        .modal-body p { color: #334155; line-height: 1.7; font-size: 1rem; }
+
+        /* Modale Authentification */
+        .auth-container { max-width: 450px; padding: 40px 30px; }
+        .auth-tabs { display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .auth-tab { font-size: 1.2rem; font-weight: 600; color: var(--text-muted); background: none; border: none; cursor: pointer; padding-bottom: 8px; position: relative; transition: var(--transition); }
+        .auth-tab.active { color: var(--primary); }
+        .auth-tab.active::after { content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 3px; background-color: var(--primary); }
+        .auth-form { display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; }
+        .auth-form.active { display: flex; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 0.9rem; font-weight: 600; }
+        .input-group input { padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; font-size: 1rem; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+        .auth-submit-btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+
+        /* Cartes résultats recherche */
+        .article-card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: var(--shadow); border-left: 5px solid transparent; animation: slideIn 0.4s forwards ease; }
+        .article-card:hover { transform: translateY(-3px); border-left-color: var(--primary); }
+
+        /* Animations */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(4deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="login-btn" onclick="openAuthModal()">
+            <i class="fa-solid fa-user-astronaut"></i> Se connecter
+        </button>
+    </div>
+
+    <header>
+        <a class="logo-link" onclick="goHome()">
+            <div class="logo">
+                <i class="fa-solid fa-compass"></i> Franc<span>.</span>
+            </div>
+        </a>
+        <p class="tagline">L'information claire, rapide et essentielle.</p>
+    </header>
+
+    <div class="search-container">
+        <form id="search-form" onsubmit="performSearch(event)">
+            <div class="search-wrapper">
+                <input type="text" id="search-query" class="search-input" placeholder="Que recherchez-vous aujourd'hui ?" required autocomplete="off">
+                <button type="submit" class="search-btn" aria-label="Rechercher">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="smart-preview" id="smart-preview">
+            <div class="preview-details">
+                <div class="preview-icon-box" id="preview-icon-container">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <div>
+                    <span class="preview-tag" id="preview-tag">Catégorie</span>
+                    <h3 class="preview-title" id="preview-title">Nom de l'entité</h3>
+                    <p class="preview-desc" id="preview-desc">Description de l'aperçu rapide...</p>
+                </div>
+            </div>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="preview-link-btn" id="preview-link">
+                En savoir plus <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+    </div>
+
+    <div id="loader" class="loader">
+        <i class="fa-solid fa-circle-notch"></i>
+    </div>
+
+    <main class="results-container" id="results-container"></main>
+
+    <section class="news-section" id="news-section">
+        <h2><i class="fa-solid fa-fire-flame-curved"></i> À la une sur Franc</h2>
+        <div class="news-grid" id="news-grid">
+            <p style="color: var(--text-muted); grid-column: 1/-1; text-align: center;">Chargement des dernières actualités...</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-left">
+            <span id="copyright-year">&copy; 2026 <strong>Franc.</strong> Tous droits réservés.</span>
+            <div class="footer-links">
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions d'utilisation</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+        <div class="footer-right">
+            <div class="social-links">
+                <a href="#" aria-label="Twitter/X"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#" aria-label="Mastodon"><i class="fa-brands fa-mastodon"></i></a>
+                <a href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            </div>
+            <div class="made-in">
+                Propulsé par Franc <i class="fa-solid fa-heart"></i>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal" id="news-modal" onclick="closeModal(event, 'news-modal')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal(event, 'news-modal', true)"><i class="fa-solid fa-xmark"></i></button>
+            <img src="" alt="Image Article" id="modal-img" class="modal-img">
+            <div class="modal-body">
+                <span class="news-source" id="modal-source"></span>
+                <h3 id="modal-title"></h3>
+                <p id="modal-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="auth-modal" onclick="closeModal(event, 'auth-modal')">
+        <div class="modal-content auth-container">
+            <button class="modal-close" onclick="closeModal(event, 'auth-modal', true)"><i class="fa-solid fa-xmark"></i></button>
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Connexion</button>
+                <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Créer un compte</button>
+            </div>
+            <form id="form-login" class="auth-form active" onsubmit="handleAuthSubmit(event, 'connexion')">
+                <div class="input-group"><label for="login-email">Adresse e-mail</label><input type="email" id="login-email" required placeholder="exemple@franc.fr"></div>
+                <div class="input-group"><label for="login-password">Mot de passe</label><input type="password" id="login-password" required placeholder="••••••••"></div>
+                <button type="submit" class="auth-submit-btn">Se connecter</button>
+            </form>
+            <form id="form-register" class="auth-form" onsubmit="handleAuthSubmit(event, 'inscription')">
+                <div class="input-group"><label for="reg-name">Nom complet</label><input type="text" id="reg-name" required placeholder="Jean Dupont"></div>
+                <div class="input-group"><label for="reg-email">Adresse e-mail</label><input type="email" id="reg-email" required placeholder="exemple@franc.fr"></div>
+                <div class="input-group"><label for="reg-password">Mot de passe</label><input type="password" id="reg-password" required placeholder="Minimum 8 caractères"></div>
+                <button type="submit" class="auth-submit-btn">Créer mon compte</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Base de connaissances intelligente
+        const smartKnowledgeBase = [
+            { keys: ["franc", "franque", "fran"], tag: "Moteur de recherche", title: "Franc.", desc: "Moteur de recherche familial, rapide et conçu pour aller droit à l'essentiel tout en respectant votre navigation.", icon: "fa-compass", url: "#" },
+            { keys: ["google", "googl", "gogle"], tag: "Technologie", title: "Google", desc: "Entreprise technologique américaine leader mondial de la recherche en ligne, des cartes de navigation et de l'IA.", icon: "fa-brands fa-google", url: "https://www.google.com" },
+            { keys: ["elon musk", "musk", "elon"], tag: "Personnalité", title: "Elon Musk", desc: "Entrepreneur et ingénieur, PDG de SpaceX, de Tesla, et figure majeure de l'innovation spatiale et technologique.", icon: "fa-user-tie", url: "https://fr.wikipedia.org/wiki/Elon_Musk" },
+            { keys: ["marie curie", "curie", "marie cri"], tag: "Personnalité / Science", title: "Marie Curie", desc: "Physicienne et chimiste polonaise naturalisée française, double prix Nobel, célèbre pour ses travaux sur la radioactivité.", icon: "fa-user-graduate", url: "https://fr.wikipedia.org/wiki/Marie_Curie" },
+            { keys: ["paris", "pari", "paname"], tag: "Lieu / Ville", title: "Paris", desc: "Capitale de la France, pôle mondial de l'art, de la mode, de la gastronomie et de la culture célèbre pour sa Tour Eiffel.", icon: "fa-building-columns", url: "https://www.paris.fr" },
+            { keys: ["tokyo", "tokio", "toky"], tag: "Lieu / Ville", title: "Tokyo", desc: "Capitale ultra-moderne du Japon, mêlant gratte-ciels lumineux, temples anciens et culture pop-art dynamique.", icon: "fa-torii-gate", url: "https://www.gotokyo.org/fr" }
+        ];
+
+        // Actualités en direct via Wikipédia
+        async function fetchLiveNews() {
+            const grid = document.getElementById('news-grid');
+            const url = `https://fr.wikipedia.org/w/api.php?action=query&list=search&srsearch=Inventions%20ou%20Découvertes%20récentes%20Science&utf8=&format=json&origin=*&srlimit=3`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.query && data.query.search.length > 0) {
+                    grid.innerHTML = '';
+                    const imageIds = [1014, 1041, 1021]; 
+                    const categories = ["FRANC TECH", "FRANC PLANÈTE", "FRANC SCIENCE"];
+
+                    data.query.search.forEach((art, index) => {
+                        const cleanSnippet = art.snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                        const imageUrl = `https://picsum.photos/id/${imageIds[index]}/600/400`;
+
+                        const card = document.createElement('div');
+                        card.className = 'news-card';
+                        
+                        const articleObj = {
+                            source: categories[index],
+                            title: art.title,
+                            desc: cleanSnippet + "...",
+                            content: cleanSnippet + " Retrouvez l'intégralité de ce sujet passionnant mis à jour régulièrement par la communauté des experts et chercheurs indépendants.",
+                            img: imageUrl
+                        };
+
+                        card.onclick = () => openNewsModal(articleObj);
+                        card.innerHTML = `
+                            <div class="news-img-wrapper"><img src="${imageUrl}" alt="Illustration" class="news-img"></div>
+                            <div class="news-content">
+                                <span class="news-source">${categories[index]}</span>
+                                <h3 class="news-title">${art.title}</h3>
+                                <p class="news-desc">${cleanSnippet}...</p>
+                            </div>`;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    fallbackNews();
+                }
+            } catch (error) {
+                fallbackNews();
+            }
+        }
+
+        function fallbackNews() {
+            const grid = document.getElementById('news-grid');
+            grid.innerHTML = '';
+            const fallbackData = [
+                { source: "Franc Tech", title: "IA & Médecine", desc: "Un nouveau modèle IA détecte les pathologies complexes en avance.", content: "Contenu complet de l'article de secours.", img: "https://picsum.photos/id/1014/600/400" },
+                { source: "Franc Planète", title: "Fusion Nucléaire", desc: "Avancée majeure sur la stabilisation du plasma haute température.", content: "Contenu complet de l'article de secours.", img: "https://picsum.photos/id/1041/600/400" }
+            ];
+            fallbackData.forEach(art => {
+                const card = document.createElement('div');
+                card.className = 'news-card';
+                card.onclick = () => openNewsModal(art);
+                card.innerHTML = `
+                    <div class="news-img-wrapper"><img src="${art.img}" alt="Illustration" class="news-img"></div>
+                    <div class="news-content">
+                        <span class="news-source">${art.source}</span>
+                        <h3 class="news-title">${art.title}</h3>
+                        <p class="news-desc">${art.desc}</p>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function goHome() {
+            document.getElementById('search-query').value = '';
+            document.getElementById('results-container').innerHTML = '';
+            document.getElementById('smart-preview').style.display = 'none';
+            const newsSection = document.getElementById('news-section');
+            newsSection.style.display = 'block';
+            fetchLiveNews();
+        }
+
+        function checkSmartPreview(query) {
+            const previewBox = document.getElementById('smart-preview');
+            const cleanQuery = query.toLowerCase().trim();
+            
+            const matchedEntity = smartKnowledgeBase.find(entity => 
+                entity.keys.some(key => cleanQuery.includes(key) || key.includes(cleanQuery)) && cleanQuery.length >= 3
+            );
+            
+            if (matchedEntity) {
+                document.getElementById('preview-tag').innerText = matchedEntity.tag;
+                document.getElementById('preview-title').innerText = matchedEntity.title;
+                document.getElementById('preview-desc').innerText = matchedEntity.desc;
+                document.getElementById('preview-link').href = matchedEntity.url;
+                
+                const iconContainer = document.getElementById('preview-icon-container');
+                iconContainer.innerHTML = matchedEntity.icon.includes('fa-') ? `<i class="${matchedEntity.icon}"></i>` : `<i class="fa-solid fa-${matchedEntity.icon}"></i>`;
+                
+                previewBox.style.display = 'flex';
+            } else {
+                previewBox.style.display = 'none';
+            }
+        }
+
+        async function performSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('search-query').value.trim();
+            const resultsContainer = document.getElementById('results-container');
+            const loader = document.getElementById('loader');
+            const newsSection = document.getElementById('news-section');
+
+            if (!query) return;
+
+            resultsContainer.innerHTML = '';
+            loader.style.display = 'block';
+            newsSection.style.display = 'none'; 
+
+            checkSmartPreview(query);
+
+            const url = `https://fr.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=4&srsearch=${encodeURIComponent(query)}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                loader.style.display = 'none';
+
+                if (data.query.search.length === 0) {
+                    resultsContainer.innerHTML = `<div class="article-card"><p>Aucun résultat pour "${query}".</p></div>`;
+                    return;
+                }
+
+                data.query.search.forEach(article => {
+                    const articleUrl = `https://fr.wikipedia.org/?curid=${article.pageid}`;
+                    const cleanSnippet = article.snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                    const card = document.createElement('article');
+                    card.className = 'article-card';
+                    card.innerHTML = `
+                        <h3 class="news-title"><a href="${articleUrl}" target="_blank" style="text-decoration:none; color:var(--text-main);">${article.title}</a></h3>
+                        <p class="news-desc" style="-webkit-line-clamp: unset;">${cleanSnippet}...</p>`;
+                    resultsContainer.appendChild(card);
+                });
+            } catch (error) {
+                loader.style.display = 'none';
+                resultsContainer.innerHTML = `<div class="article-card" style="color:red;"><p>Erreur de connexion.</p></div>`;
+            }
+        }
+
+        function openNewsModal(article) {
+            document.getElementById('modal-img').src = article.img;
+            document.getElementById('modal-source').innerText = article.source;
+            document.getElementById('modal-title').innerText = article.title;
+            document.getElementById('modal-text').innerText = article.content;
+            document.getElementById('news-modal').classList.add('active');
+        }
+
+        function openAuthModal() { document.getElementById('auth-modal').classList.add('active'); }
+        function switchAuthTab(type) {
+            const tl = document.getElementById('tab-login'), tr = document.getElementById('tab-register');
+            const fl = document.getElementById('form-login'), fr = document.getElementById('form-register');
+            if(type==='login'){tl.classList.add('active');tr.classList.remove('active');fl.classList.add('active');fr.classList.remove('active');}
+            else{tr.classList.add('active');tl.classList.remove('active');fr.classList.add('active');fl.classList.remove('active');}
+        }
+
+        function closeModal(event, modalId, force = false) { if (force || event.target.id === modalId) { document.getElementById(modalId).classList.remove('active'); } }
+        function handleAuthSubmit(event, type) { event.preventDefault(); alert(`Action d'${type} réussie.`); closeModal(event, 'auth-modal', true); }
+
+        // Met à jour automatiquement l'année de copyright
+        document.getElementById('copyright-year').innerHTML = `&copy; ${new Date().getFullYear()} <strong>Franc.</strong> Tous droits réservés.`;
+
+        window.onload = fetchLiveNews;
+    </script>
+</body>
+</html>
