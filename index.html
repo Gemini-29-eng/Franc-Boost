@@ -37,6 +37,7 @@
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
+            position: relative;
         }
 
         /* Barre supérieure */
@@ -46,6 +47,7 @@
             justify-content: flex-end;
             padding: 20px 40px;
             animation: fadeInDown 0.6s ease;
+            z-index: 10;
         }
 
         .login-btn {
@@ -75,6 +77,7 @@
             margin-top: 2vh;
             text-align: center;
             animation: fadeInDown 0.8s ease;
+            z-index: 10;
         }
 
         .logo-link {
@@ -109,7 +112,7 @@
             margin-top: 5px;
         }
 
-        /* Barre de recherche */
+        /* Barre de recherche et son conteneur */
         .search-container {
             width: 90%;
             max-width: 650px;
@@ -117,6 +120,21 @@
             position: relative;
             animation: scaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 10;
+        }
+
+        /* NOUVEAUTÉ : La tache bleue lumineuse en arrière-plan */
+        .search-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140%;
+            height: 350px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.04) 45%, rgba(248, 250, 252, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+            animation: pulseGlow 4s ease-in-out infinite alternate;
         }
 
         .search-wrapper {
@@ -211,6 +229,7 @@
         .results-container {
             width: 90%; max-width: 750px; margin-top: 20px;
             display: flex; flex-direction: column; gap: 15px;
+            z-index: 10;
         }
 
         .loader {
@@ -222,6 +241,7 @@
         .news-section {
             width: 90%; max-width: 950px; margin: 60px 0 40px 0;
             animation: fadeInUp 0.8s ease;
+            z-index: 10;
         }
 
         .news-section h2 {
@@ -248,13 +268,13 @@
         .news-title { font-size: 1.05rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; color: var(--text-main); }
         .news-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* NOUVEAUTÉ : Pied de page (Style Qwant) */
+        /* Pied de page (Style Qwant) */
         footer {
             width: 100%;
             background: var(--card-bg);
             border-top: 1px solid #e2e8f0;
             padding: 25px 40px;
-            margin-top: auto; /* Pousse le footer vers le bas si la page est vide */
+            margin-top: auto;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -271,61 +291,16 @@
             font-size: 0.9rem;
         }
 
-        .footer-left span strong {
-            color: var(--text-main);
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: var(--primary);
-        }
-
-        .footer-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-links a {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            transition: var(--transition);
-        }
-
-        .social-links a:hover {
-            color: var(--text-main);
-            transform: scale(1.1);
-        }
-
-        .made-in {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .made-in i {
-            color: #ef4444;
-        }
+        .footer-left span strong { color: var(--text-main); }
+        .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: var(--transition); }
+        .footer-links a:hover { color: var(--primary); }
+        .footer-right { display: flex; align-items: center; gap: 20px; }
+        .social-links { display: flex; gap: 15px; }
+        .social-links a { color: var(--text-muted); font-size: 1.1rem; transition: var(--transition); }
+        .social-links a:hover { color: var(--text-main); transform: scale(1.1); }
+        .made-in { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .made-in i { color: #ef4444; }
 
         /* Modales */
         .modal {
@@ -383,6 +358,12 @@
         @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(4deg); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+        
+        /* Respiration subtile du halo lumineux arrière-plan */
+        @keyframes pulseGlow {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.98); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); }
+        }
     </style>
 </head>
 <body>
@@ -403,6 +384,8 @@
     </header>
 
     <div class="search-container">
+        <div class="search-glow"></div>
+        
         <form id="search-form" onsubmit="performSearch(event)">
             <div class="search-wrapper">
                 <input type="text" id="search-query" class="search-input" placeholder="Que recherchez-vous aujourd'hui ?" required autocomplete="off">
@@ -671,7 +654,7 @@
         function closeModal(event, modalId, force = false) { if (force || event.target.id === modalId) { document.getElementById(modalId).classList.remove('active'); } }
         function handleAuthSubmit(event, type) { event.preventDefault(); alert(`Action d'${type} réussie.`); closeModal(event, 'auth-modal', true); }
 
-        // Met à jour automatiquement l'année de copyright
+        // Maintient l'année de copyright à jour
         document.getElementById('copyright-year').innerHTML = `&copy; ${new Date().getFullYear()} <strong>Franc.</strong> Tous droits réservés.`;
 
         window.onload = fetchLiveNews;
