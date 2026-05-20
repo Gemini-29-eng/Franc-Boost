@@ -10,16 +10,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* Variables CSS dynamiques basées sur les préférences */
         :root {
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --primary: #3b82f6;
+            --primary: #3b82f6; /* Bleu par défaut */
             --primary-hover: #2563eb;
             --primary-light: #eff6ff;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --border-color: #e2e8f0;
             --transition: cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+        }
+
+        /* Thème Sombre */
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary-light: rgba(59, 130, 246, 0.15);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --border-color: #334155;
         }
 
         * {
@@ -38,9 +51,10 @@
             align-items: center;
             overflow-x: hidden;
             position: relative;
+            transition: background-color 0.3s var(--transition), color 0.3s var(--transition);
         }
 
-        /* Halo lumineux global non coupé et parfaitement diffusé */
+        /* Halo lumineux global */
         .global-glow {
             position: absolute;
             top: 250px;
@@ -48,7 +62,7 @@
             transform: translate(-50%, -50%);
             width: 1000px;
             height: 600px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.14) 0%, rgba(59, 130, 246, 0.05) 40%, rgba(248, 250, 252, 0) 70%);
+            background: radial-gradient(circle, var(--primary-light) 0%, rgba(59, 130, 246, 0.02) 50%, rgba(248, 250, 252, 0) 70%);
             border-radius: 50%;
             pointer-events: none;
             z-index: 1;
@@ -60,9 +74,11 @@
             width: 100%;
             display: flex;
             justify-content: flex-end;
+            align-items: center;
             padding: 20px 40px;
             animation: fadeInDown 0.6s ease;
-            z-index: 10;
+            z-index: 50;
+            position: relative;
         }
 
         .login-btn {
@@ -84,7 +100,104 @@
         .login-btn:hover {
             background-color: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* NOUVEAUTÉ : Avatar utilisateur connecté */
+        .user-profile-container {
+            position: relative;
+            display: none; /* Masqué par défaut */
+        }
+
+        .avatar-btn {
+            background: none;
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .avatar-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .avatar-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* NOUVEAUTÉ : Menu déroulant de l'avatar (Dropdown) */
+        .profile-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 240px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            animation: scaleUp 0.2s ease;
+            z-index: 100;
+        }
+
+        .profile-dropdown.active {
+            display: flex;
+        }
+
+        .dropdown-info {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .dropdown-info p {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .dropdown-info span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .dropdown-item {
+            background: none;
+            border: none;
+            padding: 10px 12px;
+            text-align: left;
+            width: 100%;
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .dropdown-item.logout {
+            color: #ef4444;
+        }
+        .dropdown-item.logout:hover {
+            background: rgba(239, 68, 68, 0.1);
         }
 
         /* En-tête / Logo */
@@ -110,10 +223,8 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: var(--transition);
         }
 
-        .logo-link:hover .logo { transform: scale(1.02); }
         .logo span { color: var(--primary); }
         .logo i {
             font-size: 2.5rem;
@@ -151,7 +262,6 @@
         .search-wrapper:focus-within {
             border-color: var(--primary);
             transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.1);
         }
 
         .search-input {
@@ -180,7 +290,7 @@
 
         .search-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
 
-        /* CORRECTION : Masqué par défaut (display: none), apparaît après la recherche */
+        /* Catégories de recherche style Google */
         .search-categories {
             display: none; 
             justify-content: center;
@@ -190,11 +300,6 @@
             overflow-x: auto;
             white-space: nowrap;
             scrollbar-width: none;
-            animation: fadeIn 0.4s ease forwards;
-        }
-
-        .search-categories::-webkit-scrollbar {
-            display: none;
         }
 
         .category-tab {
@@ -212,214 +317,124 @@
             transition: var(--transition);
         }
 
-        .category-tab i {
-            font-size: 0.9rem;
-        }
-
-        .category-tab:hover {
-            color: var(--primary);
-        }
-
-        .category-tab.active {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
+        .category-tab:hover, .category-tab.active { color: var(--primary); }
+        .category-tab.active { font-weight: 600; }
         .category-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--primary);
-            border-radius: 50px;
+            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 3px; background-color: var(--primary); border-radius: 50px;
         }
 
         /* Aperçu Intelligent de Recherche */
         .smart-preview {
             display: none;
-            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-            border-radius: 20px;
-            padding: 20px 25px;
-            box-shadow: var(--shadow);
-            border-left: 6px solid var(--primary);
-            margin-top: 25px;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            width: 100%;
-            max-width: 750px;
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: slideIn 0.4s forwards ease;
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+            border-radius: 20px; padding: 20px 25px; box-shadow: var(--shadow);
+            border-left: 6px solid var(--primary); margin-top: 25px; align-items: center;
+            justify-content: space-between; gap: 20px; width: 100%; opacity: 0;
+            transform: translateY(-10px); animation: slideIn 0.4s forwards ease;
         }
 
         .preview-details { display: flex; align-items: center; gap: 20px; }
-
         .preview-icon-box {
-            width: 60px; height: 60px; background: white; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .preview-icon-box i { animation: pulse 1.5s infinite alternate; }
-
-        .preview-tag {
-            font-size: 0.75rem; text-transform: uppercase; font-weight: 700;
-            color: var(--primary); background: var(--primary-light);
-            padding: 4px 10px; border-radius: 50px; display: inline-block; margin-bottom: 5px;
+            width: 60px; height: 60px; background: var(--card-bg); border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--primary);
         }
 
-        .preview-title { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
-        .preview-desc { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
-
+        .preview-tag { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 4px 10px; border-radius: 50px; margin-bottom: 5px; display: inline-block; }
+        .preview-title { font-size: 1.2rem; font-weight: 700; }
+        .preview-desc { font-size: 0.9rem; color: var(--text-muted); }
         .preview-link-btn {
-            background: white; color: var(--text-main); text-decoration: none;
-            padding: 10px 18px; border-radius: 50px; font-size: 0.85rem; font-weight: 600;
-            border: 1px solid #e2e8f0; white-space: nowrap; display: flex; align-items: center; gap: 8px;
-            transition: var(--transition);
+            background: var(--card-bg); color: var(--text-main); text-decoration: none; padding: 10px 18px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; transition: var(--transition);
         }
-        .preview-link-btn:hover { background: var(--primary); color: white; border-color: var(--primary); transform: translateX(3px); }
+        .preview-link-btn:hover { background: var(--primary); color: white; }
 
-        /* Zone de résultats */
-        .results-container {
-            width: 90%; max-width: 750px; margin-top: 20px;
-            display: flex; flex-direction: column; gap: 15px;
-            z-index: 10;
-        }
-
-        .loader {
-            display: none; text-align: center; font-size: 2rem; color: var(--primary); margin-top: 20px;
-        }
+        /* Résultats et Actualités */
+        .results-container { width: 90%; max-width: 750px; margin-top: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 10; }
+        .loader { display: none; text-align: center; font-size: 2rem; color: var(--primary); margin-top: 20px; }
         .loader i { animation: spin 1s linear infinite; }
 
-        /* Section Actualités */
-        .news-section {
-            width: 90%; max-width: 950px; margin: 60px 0 40px 0;
-            animation: fadeInUp 0.8s ease;
-            z-index: 10;
-        }
-
-        .news-section h2 {
-            font-size: 1.8rem; margin-bottom: 25px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .news-section h2 i { color: #ef4444; animation: pulse 1s infinite alternate; }
-        
+        .news-section { width: 90%; max-width: 950px; margin: 60px 0 40px 0; z-index: 10; }
+        .news-section h2 { font-size: 1.8rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .news-section h2 i { color: #ef4444; }
         .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
 
-        .news-card {
-            background: var(--card-bg); border-radius: 16px; overflow: hidden;
-            box-shadow: var(--shadow); cursor: pointer; transition: var(--transition);
-            display: flex; flex-direction: column; min-height: 380px;
-        }
-        .news-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); }
-        
-        .news-img-wrapper { width: 100%; height: 180px; overflow: hidden; background-color: #e2e8f0; }
+        .news-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); display: flex; flex-direction: column; min-height: 380px; }
+        .news-card:hover { transform: translateY(-6px); }
+        .news-img-wrapper { width: 100%; height: 180px; overflow: hidden; }
         .news-img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); }
-        .news-card:hover .news-img { transform: scale(1.06); }
-        
         .news-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
         .news-source { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
-        .news-title { font-size: 1.05rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; color: var(--text-main); }
+        .news-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 10px; }
         .news-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* Pied de page (Style Qwant) */
-        footer {
-            width: 100%;
-            background: var(--card-bg);
-            border-top: 1px solid #e2e8f0;
-            padding: 25px 40px;
-            margin-top: auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            z-index: 10;
-        }
-
-        .footer-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .footer-left span strong { color: var(--text-main); }
-        .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: var(--transition); }
+        /* Pied de page */
+        footer { width: 100%; background: var(--card-bg); border-top: 1px solid var(--border-color); padding: 25px 40px; margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; z-index: 10; }
+        .footer-left { display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 0.9rem; }
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; }
         .footer-links a:hover { color: var(--primary); }
-        .footer-right { display: flex; align-items: center; gap: 20px; }
-        .social-links { display: flex; gap: 15px; }
-        .social-links a { color: var(--text-muted); font-size: 1.1rem; transition: var(--transition); }
-        .social-links a:hover { color: var(--text-main); transform: scale(1.1); }
-        .made-in { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
-        .made-in i { color: #ef4444; }
+        .footer-right { display: flex; gap: 20px; color: var(--text-muted); font-size: 0.9rem; }
+        .social-links a { color: var(--text-muted); margin-right: 10px; }
 
-        /* Modales */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
-        }
+        /* Modales Structurelles */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 600px; max-height: 85vh; border-radius: 24px; overflow-y: auto; box-shadow: var(--shadow); transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }
+        .modal.active .modal-content { transform: scale(1); }
+        .modal-close { position: absolute; top: 20px; right: 20px; background: var(--bg-color); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: var(--shadow); z-index: 11; }
 
-        .modal-content {
-            background: var(--card-bg); width: 90%; max-width: 700px; max-height: 85vh;
-            border-radius: 24px; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            transform: scale(0.9) translateY(20px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-        }
-        .modal.active .modal-content { transform: scale(1) translateY(0); }
+        /* NOUVEAUTÉ : Modale Paramètres Intelligente */
+        .settings-body { padding: 35px; }
+        .settings-body h3 { font-size: 1.5rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .settings-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+        .settings-section h4 { font-size: 1.05rem; margin-bottom: 12px; color: var(--text-main); }
+        
+        /* Bouton Switch Mode Sombre */
+        .switch-row { display: flex; justify-content: space-between; align-items: center; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
 
-        .modal-close {
-            position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.9);
-            border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: var(--transition); z-index: 11;
-        }
-        .modal-close:hover { transform: rotate(90deg); background: #ef4444; color: white; }
-        .modal-img { width: 100%; height: 320px; object-fit: cover; background-color: #e2e8f0; }
-        .modal-body { padding: 30px; }
-        .modal-body h3 { font-size: 1.5rem; margin: 10px 0 15px 0; line-height: 1.4; }
-        .modal-body p { color: #334155; line-height: 1.7; font-size: 1rem; }
+        /* Sélecteurs de couleur thématique */
+        .color-picker-grid { display: flex; gap: 15px; margin-top: 10px; }
+        .color-dot { width: 35px; height: 35px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: var(--transition); }
+        .color-dot.active { border-color: var(--text-main); transform: scale(1.1); }
+        .dot-blue { background-color: #3b82f6; }
+        .dot-green { background-color: #10b981; }
+        .dot-purple { background-color: #8b5cf6; }
+        .dot-orange { background-color: #f97316; }
+
+        /* Checkbox listes (Cookies & Actu) */
+        .pref-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .pref-item { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
+        .pref-item input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
 
         /* Modale Authentification */
         .auth-container { max-width: 450px; padding: 40px 30px; }
-        .auth-tabs { display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .auth-tab { font-size: 1.2rem; font-weight: 600; color: var(--text-muted); background: none; border: none; cursor: pointer; padding-bottom: 8px; position: relative; transition: var(--transition); }
+        .auth-tabs { display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .auth-tab { font-size: 1.2rem; font-weight: 600; color: var(--text-muted); background: none; border: none; cursor: pointer; padding-bottom: 8px; position: relative; }
         .auth-tab.active { color: var(--primary); }
         .auth-tab.active::after { content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 3px; background-color: var(--primary); }
-        .auth-form { display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; }
+        .auth-form { display: none; flex-direction: column; gap: 20px; }
         .auth-form.active { display: flex; }
         .input-group { display: flex; flex-direction: column; gap: 8px; }
         .input-group label { font-size: 0.9rem; font-weight: 600; }
-        .input-group input { padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; font-size: 1rem; }
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+        .input-group input { padding: 12px 16px; border: 2px solid var(--border-color); background: var(--card-bg); color: var(--text-main); border-radius: 10px; outline: none; }
+        .input-group input:focus { border-color: var(--primary); }
         .auth-submit-btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
 
         /* Cartes résultats recherche */
         .article-card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: var(--shadow); border-left: 5px solid transparent; animation: slideIn 0.4s forwards ease; }
-        .article-card:hover { transform: translateY(-3px); border-left-color: var(--primary); }
+        .article-card:hover { border-left-color: var(--primary); }
 
         /* Animations */
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
         @keyframes scaleUp { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(4deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
-        
-        /* Respiration douce du halo de fond */
-        @keyframes pulseGlow {
-            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.95); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-        }
+        @keyframes pulseGlow { 0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.95); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } }
     </style>
 </head>
 <body>
@@ -427,9 +442,23 @@
     <div class="global-glow"></div>
 
     <div class="top-bar">
-        <button class="login-btn" onclick="openAuthModal()">
+        <button class="login-btn" id="main-login-btn" onclick="openAuthModal()">
             <i class="fa-solid fa-user-astronaut"></i> Se connecter
         </button>
+
+        <div class="user-profile-container" id="user-profile-container">
+            <button class="avatar-btn" onclick="toggleProfileDropdown(event)">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80" alt="Avatar Utilisateur" id="user-avatar-img">
+            </button>
+            <div class="profile-dropdown" id="profile-dropdown">
+                <div class="dropdown-info">
+                    <p id="dropdown-username">Utilisateur</p>
+                    <span id="dropdown-email">membre@franc.fr</span>
+                </div>
+                <button class="dropdown-item" onclick="openSettingsModal()"><i class="fa-solid fa-gear"></i> Paramètres</button>
+                <button class="dropdown-item logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</button>
+            </div>
+        </div>
     </div>
 
     <header>
@@ -458,28 +487,9 @@
             <button class="category-tab" onclick="switchCategory(this, 'news')"><i class="fa-regular fa-newspaper"></i> Actualités</button>
             <button class="category-tab" onclick="switchCategory(this, 'shopping')"><i class="fa-solid fa-bag-shopping"></i> Shopping</button>
         </div>
-
-        <div class="smart-preview" id="smart-preview">
-            <div class="preview-details">
-                <div class="preview-icon-box" id="preview-icon-container">
-                    <i class="fa-solid fa-globe"></i>
-                </div>
-                <div>
-                    <span class="preview-tag" id="preview-tag">Catégorie</span>
-                    <h3 class="preview-title" id="preview-title">Nom de l'entité</h3>
-                    <p class="preview-desc" id="preview-desc">Description de l'aperçu rapide...</p>
-                </div>
-            </div>
-            <a href="#" target="_blank" rel="noopener noreferrer" class="preview-link-btn" id="preview-link">
-                En savoir plus <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-        </div>
     </div>
 
-    <div id="loader" class="loader">
-        <i class="fa-solid fa-circle-notch"></i>
-    </div>
-
+    <div id="loader" class="loader"><i class="fa-solid fa-circle-notch"></i></div>
     <main class="results-container" id="results-container"></main>
 
     <section class="news-section" id="news-section">
@@ -491,34 +501,56 @@
 
     <footer>
         <div class="footer-left">
-            <span id="copyright-year">&copy; 2026 <strong>Franc.</strong> Tous droits réservés.</span>
-            <div class="footer-links">
-                <a href="#">À propos</a>
-                <a href="#">Confidentialité</a>
-                <a href="#">Conditions d'utilisation</a>
-                <a href="#">Contact</a>
-            </div>
-        </div>
-        <div class="footer-right">
-            <div class="social-links">
-                <a href="#" aria-label="Twitter/X"><i class="fa-brands fa-x-twitter"></i></a>
-                <a href="#" aria-label="Mastodon"><i class="fa-brands fa-mastodon"></i></a>
-                <a href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-            </div>
-            <div class="made-in">
-                Propulsé par Franc <i class="fa-solid fa-heart"></i>
-            </div>
+            <span>&copy; 2026 <strong>Franc.</strong> Tous droits réservés.</span>
+            <div class="footer-links"><a href="#">À propos</a><a href="#">Confidentialité</a><a href="#">Contact</a></div>
         </div>
     </footer>
 
-    <div class="modal" id="news-modal" onclick="closeModal(event, 'news-modal')">
+    <div class="modal" id="settings-modal" onclick="closeModal(event, 'settings-modal')">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal(event, 'news-modal', true)"><i class="fa-solid fa-xmark"></i></button>
-            <img src="" alt="Image Article" id="modal-img" class="modal-img">
-            <div class="modal-body">
-                <span class="news-source" id="modal-source"></span>
-                <h3 id="modal-title"></h3>
-                <p id="modal-text"></p>
+            <button class="modal-close" onclick="closeModal(event, 'settings-modal', true)"><i class="fa-solid fa-xmark"></i></button>
+            <div class="settings-body">
+                <h3><i class="fa-solid fa-sliders"></i> Préférences de l'interface</h3>
+                
+                <div class="settings-section switch-row">
+                    <div>
+                        <h4>Thème Sombre</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Activer l'ambiance nocturne protectrice.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Couleur de l'interface</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Personnaliser la couleur dominante des boutons et éléments.</p>
+                    <div class="color-picker-grid">
+                        <div class="color-dot dot-blue active" onclick="changeInterfaceColor('#3b82f6', '#2563eb', this)"></div>
+                        <div class="color-dot dot-green" onclick="changeInterfaceColor('#10b981', '#059669', this)"></div>
+                        <div class="color-dot dot-purple" onclick="changeInterfaceColor('#8b5cf6', '#7c3aed', this)"></div>
+                        <div class="color-dot dot-orange" onclick="changeInterfaceColor('#f97316', '#ea580c', this)"></div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Gestion de la confidentialité (Cookies)</h4>
+                    <div class="pref-list">
+                        <label class="pref-item"><input type="checkbox" checked> Cookies essentiels (Requis)</label>
+                        <label class="pref-item"><input type="checkbox" checked> Mesures d'audience et statistiques</label>
+                        <label class="pref-item"><input type="checkbox"> Personnalisation de l'expérience</label>
+                    </div>
+                </div>
+
+                <div class="settings-section" style="border-bottom: none; padding-bottom: 0;">
+                    <h4>Flux d'actualités favoris</h4>
+                    <div class="pref-list">
+                        <label class="pref-item"><input type="checkbox" checked> Technologies & IA</label>
+                        <label class="pref-item"><input type="checkbox" checked> Sciences & Découvertes</label>
+                        <label class="pref-item"><input type="checkbox" checked> Environnement & Planète</label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -530,199 +562,92 @@
                 <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Connexion</button>
                 <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Créer un compte</button>
             </div>
-            <form id="form-login" class="auth-form active" onsubmit="handleAuthSubmit(event, 'connexion')">
-                <div class="input-group"><label for="login-email">Adresse e-mail</label><input type="email" id="login-email" required placeholder="exemple@franc.fr"></div>
-                <div class="input-group"><label for="login-password">Mot de passe</label><input type="password" id="login-password" required placeholder="••••••••"></div>
+            <form id="form-login" class="auth-form active" onsubmit="handleAuthSubmit(event, 'login')">
+                <div class="input-group"><label>Adresse e-mail</label><input type="email" id="login-email" required placeholder="exemple@franc.fr"></div>
+                <div class="input-group"><label>Mot de passe</label><input type="password" required placeholder="••••••••"></div>
                 <button type="submit" class="auth-submit-btn">Se connecter</button>
             </form>
-            <form id="form-register" class="auth-form" onsubmit="handleAuthSubmit(event, 'inscription')">
-                <div class="input-group"><label for="reg-name">Nom complet</label><input type="text" id="reg-name" required placeholder="Jean Dupont"></div>
-                <div class="input-group"><label for="reg-email">Adresse e-mail</label><input type="email" id="reg-email" required placeholder="exemple@franc.fr"></div>
-                <div class="input-group"><label for="reg-password">Mot de passe</label><input type="password" id="reg-password" required placeholder="Minimum 8 caractères"></div>
+            <form id="form-register" class="auth-form" onsubmit="handleAuthSubmit(event, 'register')">
+                <div class="input-group"><label>Nom complet</label><input type="text" id="reg-name" required placeholder="Jean Dupont"></div>
+                <div class="input-group"><label>Adresse e-mail</label><input type="email" id="reg-email" required placeholder="exemple@franc.fr"></div>
+                <div class="input-group"><label>Mot de passe</label><input type="password" required placeholder="Minimum 8 caractères"></div>
                 <button type="submit" class="auth-submit-btn">Créer mon compte</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Base de connaissances intelligente
-        const smartKnowledgeBase = [
-            { keys: ["franc", "franque", "fran"], tag: "Moteur de recherche", title: "Franc.", desc: "Moteur de recherche familial, rapide et conçu pour aller droit à l'essentiel tout en respectant votre navigation.", icon: "fa-compass", url: "#" },
-            { keys: ["google", "googl", "gogle"], tag: "Technologie", title: "Google", desc: "Entreprise technologique américaine leader mondial de la recherche en ligne, des cartes de navigation et de l'IA.", icon: "fa-brands fa-google", url: "https://www.google.com" },
-            { keys: ["elon musk", "musk", "elon"], tag: "Personnalité", title: "Elon Musk", desc: "Entrepreneur et ingénieur, PDG de SpaceX, de Tesla, et figure majeure de l'innovation spatiale et technologique.", icon: "fa-user-tie", url: "https://fr.wikipedia.org/wiki/Elon_Musk" },
-            { keys: ["marie curie", "curie", "marie cri"], tag: "Personnalité / Science", title: "Marie Curie", desc: "Physicienne et chimiste polonaise naturalisée française, double prix Nobel, célèbre pour ses travaux sur la radioactivité.", icon: "fa-user-graduate", url: "https://fr.wikipedia.org/wiki/Marie_Curie" },
-            { keys: ["paris", "pari", "paname"], tag: "Lieu / Ville", title: "Paris", desc: "Capitale de la France, pôle mondial de l'art, de la mode, de la gastronomie et de la culture célèbre pour sa Tour Eiffel.", icon: "fa-building-columns", url: "https://www.paris.fr" },
-            { keys: ["tokyo", "tokio", "toky"], tag: "Lieu / Ville", title: "Tokyo", desc: "Capitale ultra-moderne du Japon, mêlant gratte-ciels lumineux, temples anciens et culture pop-art dynamique.", icon: "fa-torii-gate", url: "https://www.gotokyo.org/fr" }
-        ];
+        // Fermer le menu dropdown si on clique à côté
+        window.onclick = function(event) {
+            if (!event.target.closest('.user-profile-container')) {
+                document.getElementById('profile-dropdown').classList.remove('active');
+            }
+        }
 
-        function switchCategory(element, category) {
-            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            document.getElementById('profile-dropdown').classList.toggle('active');
+        }
+
+        function openSettingsModal() {
+            document.getElementById('profile-dropdown').classList.remove('active');
+            document.getElementById('settings-modal').classList.add('active');
+        }
+
+        // Changement dynamique de Thème (Clair / Sombre)
+        function toggleTheme(checkbox) {
+            if (checkbox.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+
+        // Changement dynamique de la couleur d'accentuation principale
+        function changeInterfaceColor(primaryColor, hoverColor, element) {
+            document.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active'));
             element.classList.add('active');
             
-            const query = document.getElementById('search-query').value.trim();
-            if (query) {
-                performSearch(null);
-            }
+            // Mise à jour des variables CSS racines pour tout le site
+            document.documentElement.style.setProperty('--primary', primaryColor);
+            document.documentElement.style.setProperty('--primary-hover', hoverColor);
         }
 
-        // Actualités en direct via Wikipédia
-        async function fetchLiveNews() {
-            const grid = document.getElementById('news-grid');
-            const url = `https://fr.wikipedia.org/w/api.php?action=query&list=search&srsearch=Inventions%20ou%20Découvertes%20récentes%20Science&utf8=&format=json&origin=*&srlimit=3`;
+        // Gestion de la simulation d'authentification (Connexion & Inscription)
+        function handleAuthSubmit(event, mode) {
+            event.preventDefault();
             
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.query && data.query.search.length > 0) {
-                    grid.innerHTML = '';
-                    const imageIds = [1014, 1041, 1021]; 
-                    const categories = ["FRANC TECH", "FRANC PLANÈTE", "FRANC SCIENCE"];
+            let username = "Utilisateur";
+            let email = "membre@franc.fr";
 
-                    data.query.search.forEach((art, index) => {
-                        const cleanSnippet = art.snippet.replace(/<\/?[^>]+(>|$)/g, "");
-                        const imageUrl = `https://picsum.photos/id/${imageIds[index]}/600/400`;
-
-                        const card = document.createElement('div');
-                        card.className = 'news-card';
-                        
-                        const articleObj = {
-                            source: categories[index],
-                            title: art.title,
-                            desc: cleanSnippet + "...",
-                            content: cleanSnippet + " Retrouvez l'intégralité de ce sujet passionnant mis à jour régulièrement par la communauté des experts et chercheurs indépendants.",
-                            img: imageUrl
-                        };
-
-                        card.onclick = () => openNewsModal(articleObj);
-                        card.innerHTML = `
-                            <div class="news-img-wrapper"><img src="${imageUrl}" alt="Illustration" class="news-img"></div>
-                            <div class="news-content">
-                                <span class="news-source">${categories[index]}</span>
-                                <h3 class="news-title">${art.title}</h3>
-                                <p class="news-desc">${cleanSnippet}...</p>
-                            </div>`;
-                        grid.appendChild(card);
-                    });
-                } else {
-                    fallbackNews();
-                }
-            } catch (error) {
-                fallbackNews();
-            }
-        }
-
-        function fallbackNews() {
-            const grid = document.getElementById('news-grid');
-            grid.innerHTML = '';
-            const fallbackData = [
-                { source: "Franc Tech", title: "IA & Médecine", desc: "Un nouveau modèle IA détecte les pathologies complexes en avance.", content: "Contenu complet de l'article de secours.", img: "https://picsum.photos/id/1014/600/400" },
-                { source: "Franc Planète", title: "Fusion Nucléaire", desc: "Avancée majeure sur la stabilisation du plasma haute température.", content: "Contenu complet de l'article de secours.", img: "https://picsum.photos/id/1041/600/400" }
-            ];
-            fallbackData.forEach(art => {
-                const card = document.createElement('div');
-                card.className = 'news-card';
-                card.onclick = () => openNewsModal(art);
-                card.innerHTML = `
-                    <div class="news-img-wrapper"><img src="${art.img}" alt="Illustration" class="news-img"></div>
-                    <div class="news-content">
-                        <span class="news-source">${art.source}</span>
-                        <h3 class="news-title">${art.title}</h3>
-                        <p class="news-desc">${art.desc}</p>
-                    </div>`;
-                grid.appendChild(card);
-            });
-        }
-
-        // Retour à l'accueil : On masque à nouveau la barre de catégories
-        function goHome() {
-            document.getElementById('search-query').value = '';
-            document.getElementById('results-container').innerHTML = '';
-            document.getElementById('smart-preview').style.display = 'none';
-            document.getElementById('search-categories-bar').style.display = 'none'; // Re-masquage
-            const newsSection = document.getElementById('news-section');
-            newsSection.style.display = 'block';
-            fetchLiveNews();
-        }
-
-        function checkSmartPreview(query) {
-            const previewBox = document.getElementById('smart-preview');
-            const cleanQuery = query.toLowerCase().trim();
-            
-            const matchedEntity = smartKnowledgeBase.find(entity => 
-                entity.keys.some(key => cleanQuery.includes(key) || key.includes(cleanQuery)) && cleanQuery.length >= 3
-            );
-            
-            if (matchedEntity) {
-                document.getElementById('preview-tag').innerText = matchedEntity.tag;
-                document.getElementById('preview-title').innerText = matchedEntity.title;
-                document.getElementById('preview-desc').innerText = matchedEntity.desc;
-                document.getElementById('preview-link').href = matchedEntity.url;
-                
-                const iconContainer = document.getElementById('preview-icon-container');
-                iconContainer.innerHTML = matchedEntity.icon.includes('fa-') ? `<i class="${matchedEntity.icon}"></i>` : `<i class="fa-solid fa-${matchedEntity.icon}"></i>`;
-                
-                previewBox.style.display = 'flex';
+            if (mode === 'register') {
+                username = document.getElementById('reg-name').value;
+                email = document.getElementById('reg-email').value;
             } else {
-                previewBox.style.display = 'none';
+                const emailInput = document.getElementById('login-email').value;
+                username = emailInput.split('@')[0]; // Génère un nom à partir du mail
+                email = emailInput;
             }
+
+            // Met à jour le menu déroulant avec les vraies infos entrées
+            document.getElementById('dropdown-username').innerText = username;
+            document.getElementById('dropdown-email').innerText = email;
+
+            // Alterne l'affichage vers l'état connecté
+            document.getElementById('main-login-btn').style.display = 'none';
+            document.getElementById('user-profile-container').style.display = 'block';
+
+            closeModal(event, 'auth-modal', true);
         }
 
-        async function performSearch(event) {
-            if (event) event.preventDefault();
-            const query = document.getElementById('search-query').value.trim();
-            const resultsContainer = document.getElementById('results-container');
-            const loader = document.getElementById('loader');
-            const newsSection = document.getElementById('news-section');
-            const categoriesBar = document.getElementById('search-categories-bar');
-
-            if (!query) return;
-
-            resultsContainer.innerHTML = '';
-            loader.style.display = 'block';
-            newsSection.style.display = 'none'; 
-
-            // CORRECTION : On affiche la barre d'onglets uniquement lors du chargement des résultats
-            categoriesBar.style.display = 'flex';
-
-            checkSmartPreview(query);
-
-            const url = `https://fr.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=4&srsearch=${encodeURIComponent(query)}`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                loader.style.display = 'none';
-
-                if (data.query.search.length === 0) {
-                    resultsContainer.innerHTML = `<div class="article-card"><p>Aucun résultat pour "${query}".</p></div>`;
-                    return;
-                }
-
-                data.query.search.forEach(article => {
-                    const articleUrl = `https://fr.wikipedia.org/?curid=${article.pageid}`;
-                    const cleanSnippet = article.snippet.replace(/<\/?[^>]+(>|$)/g, "");
-                    const card = document.createElement('article');
-                    card.className = 'article-card';
-                    card.innerHTML = `
-                        <h3 class="news-title"><a href="${articleUrl}" target="_blank" style="text-decoration:none; color:var(--text-main);">${article.title}</a></h3>
-                        <p class="news-desc" style="-webkit-line-clamp: unset;">${cleanSnippet}...</p>`;
-                    resultsContainer.appendChild(card);
-                });
-            } catch (error) {
-                loader.style.display = 'none';
-                resultsContainer.innerHTML = `<div class="article-card" style="color:red;"><p>Erreur de connexion.</p></div>`;
-            }
+        // Déconnexion
+        function handleLogout() {
+            document.getElementById('user-profile-container').style.display = 'none';
+            document.getElementById('main-login-btn').style.display = 'flex';
+            document.getElementById('profile-dropdown').classList.remove('active');
         }
 
-        function openNewsModal(article) {
-            document.getElementById('modal-img').src = article.img;
-            document.getElementById('modal-source').innerText = article.source;
-            document.getElementById('modal-title').innerText = article.title;
-            document.getElementById('modal-text').innerText = article.content;
-            document.getElementById('news-modal').classList.add('active');
-        }
-
+        // Fonctions standards existantes adaptées
         function openAuthModal() { document.getElementById('auth-modal').classList.add('active'); }
         function switchAuthTab(type) {
             const tl = document.getElementById('tab-login'), tr = document.getElementById('tab-register');
@@ -730,11 +655,81 @@
             if(type==='login'){tl.classList.add('active');tr.classList.remove('active');fl.classList.add('active');fr.classList.remove('active');}
             else{tr.classList.add('active');tl.classList.remove('active');fr.classList.add('active');fl.classList.remove('active');}
         }
-
         function closeModal(event, modalId, force = false) { if (force || event.target.id === modalId) { document.getElementById(modalId).classList.remove('active'); } }
-        function handleAuthSubmit(event, type) { event.preventDefault(); alert(`Action d'${type} réussie.`); closeModal(event, 'auth-modal', true); }
+        
+        function goHome() {
+            document.getElementById('search-query').value = '';
+            document.getElementById('results-container').innerHTML = '';
+            document.getElementById('search-categories-bar').style.display = 'none';
+            document.getElementById('news-section').style.display = 'block';
+            fetchLiveNews();
+        }
 
-        document.getElementById('copyright-year').innerHTML = `&copy; ${new Date().getFullYear()} <strong>Franc.</strong> Tous droits réservés.`;
+        function switchCategory(element, category) {
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            if (document.getElementById('search-query').value.trim()) performSearch(null);
+        }
+
+        async function performSearch(event) {
+            if (event) event.preventDefault();
+            const query = document.getElementById('search-query').value.trim();
+            const resultsContainer = document.getElementById('results-container');
+            const loader = document.getElementById('loader');
+            
+            if (!query) return;
+            resultsContainer.innerHTML = '';
+            loader.style.display = 'block';
+            document.getElementById('news-section').style.display = 'none'; 
+            document.getElementById('search-categories-bar').style.display = 'flex';
+
+            const url = `https://fr.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=4&srsearch=${encodeURIComponent(query)}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                loader.style.display = 'none';
+                if (data.query.search.length === 0) {
+                    resultsContainer.innerHTML = `<div class="article-card"><p>Aucun résultat pour "${query}".</p></div>`;
+                    return;
+                }
+                data.query.search.forEach(article => {
+                    const articleUrl = `https://fr.wikipedia.org/?curid=${article.pageid}`;
+                    const cleanSnippet = article.snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                    const card = document.createElement('article');
+                    card.className = 'article-card';
+                    card.innerHTML = `<h3 class="news-title"><a href="${articleUrl}" target="_blank" style="text-decoration:none; color:var(--text-main);">${article.title}</a></h3><p class="news-desc" style="-webkit-line-clamp: unset;">${cleanSnippet}...</p>`;
+                    resultsContainer.appendChild(card);
+                });
+            } catch (error) {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function fetchLiveNews() {
+            const grid = document.getElementById('news-grid');
+            const url = `https://fr.wikipedia.org/w/api.php?action=query&list=search&srsearch=Science&utf8=&format=json&origin=*&srlimit=3`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.query && data.query.search.length > 0) {
+                    grid.innerHTML = '';
+                    const imageIds = [1014, 1041, 1021];
+                    data.query.search.forEach((art, index) => {
+                        const cleanSnippet = art.snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                        const card = document.createElement('div');
+                        card.className = 'news-card';
+                        card.innerHTML = `
+                            <div class="news-img-wrapper"><img src="https://picsum.photos/id/${imageIds[index]}/600/400" class="news-img"></div>
+                            <div class="news-content">
+                                <span class="news-source">ACTUALITÉ</span>
+                                <h3 class="news-title">${art.title}</h3>
+                                <p class="news-desc">${cleanSnippet}...</p>
+                            </div>`;
+                        grid.appendChild(card);
+                    });
+                }
+            } catch (e) {}
+        }
 
         window.onload = fetchLiveNews;
     </script>
