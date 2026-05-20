@@ -40,10 +40,10 @@
             position: relative;
         }
 
-        /* CORRECTION : Halo lumineux global non coupé et parfaitement diffusé */
+        /* Halo lumineux global non coupé et parfaitement diffusé */
         .global-glow {
             position: absolute;
-            top: 250px; /* Positionné idéalement sous l'axe recherche/logo */
+            top: 250px;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 1000px;
@@ -179,6 +179,61 @@
         }
 
         .search-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
+
+        /* NOUVEAUTÉ : Catégories de recherche style Google / Qwant */
+        .search-categories {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+            padding: 5px 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none; /* Cache la barre de défilement sur Firefox */
+        }
+
+        .search-categories::-webkit-scrollbar {
+            display: none; /* Cache la barre de défilement sur Chrome/Safari */
+        }
+
+        .category-tab {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 6px 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .category-tab i {
+            font-size: 0.9rem;
+        }
+
+        .category-tab:hover {
+            color: var(--primary);
+        }
+
+        .category-tab.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .category-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 50px;
+        }
 
         /* Aperçu Intelligent de Recherche */
         .smart-preview {
@@ -395,6 +450,14 @@
             </div>
         </form>
 
+        <div class="search-categories">
+            <button class="category-tab active" onclick="switchCategory(this, 'all')"><i class="fa-solid fa-magnifying-glass"></i> Tout</button>
+            <button class="category-tab" onclick="switchCategory(this, 'images')"><i class="fa-regular fa-image"></i> Images</button>
+            <button class="category-tab" onclick="switchCategory(this, 'videos')"><i class="fa-solid fa-film"></i> Vidéos</button>
+            <button class="category-tab" onclick="switchCategory(this, 'news')"><i class="fa-regular fa-newspaper"></i> Actualités</button>
+            <button class="category-tab" onclick="switchCategory(this, 'shopping')"><i class="fa-solid fa-bag-shopping"></i> Shopping</button>
+        </div>
+
         <div class="smart-preview" id="smart-preview">
             <div class="preview-details">
                 <div class="preview-icon-box" id="preview-icon-container">
@@ -490,6 +553,18 @@
             { keys: ["paris", "pari", "paname"], tag: "Lieu / Ville", title: "Paris", desc: "Capitale de la France, pôle mondial de l'art, de la mode, de la gastronomie et de la culture célèbre pour sa Tour Eiffel.", icon: "fa-building-columns", url: "https://www.paris.fr" },
             { keys: ["tokyo", "tokio", "toky"], tag: "Lieu / Ville", title: "Tokyo", desc: "Capitale ultra-moderne du Japon, mêlant gratte-ciels lumineux, temples anciens et culture pop-art dynamique.", icon: "fa-torii-gate", url: "https://www.gotokyo.org/fr" }
         ];
+
+        // Gérer le changement de catégorie au clic
+        function switchCategory(element, category) {
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            
+            const query = document.getElementById('search-query').value.trim();
+            if (query) {
+                // Si l'utilisateur a écrit quelque chose, on relance la recherche pour la nouvelle catégorie
+                performSearch(new Event('submit'));
+            }
+        }
 
         // Actualités en direct via Wikipédia
         async function fetchLiveNews() {
@@ -593,7 +668,7 @@
         }
 
         async function performSearch(event) {
-            event.preventDefault();
+            if (event) event.preventDefault();
             const query = document.getElementById('search-query').value.trim();
             const resultsContainer = document.getElementById('results-container');
             const loader = document.getElementById('loader');
@@ -654,7 +729,7 @@
         function closeModal(event, modalId, force = false) { if (force || event.target.id === modalId) { document.getElementById(modalId).classList.remove('active'); } }
         function handleAuthSubmit(event, type) { event.preventDefault(); alert(`Action d'${type} réussie.`); closeModal(event, 'auth-modal', true); }
 
-        // Met à jour l'année automatiquement
+        // Maintient l'année de copyright à jour
         document.getElementById('copyright-year').innerHTML = `&copy; ${new Date().getFullYear()} <strong>Franc.</strong> Tous droits réservés.`;
 
         window.onload = fetchLiveNews;
