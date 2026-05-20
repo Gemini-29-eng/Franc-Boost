@@ -40,6 +40,21 @@
             position: relative;
         }
 
+        /* CORRECTION : Halo lumineux global non coupé et parfaitement diffusé */
+        .global-glow {
+            position: absolute;
+            top: 250px; /* Positionné idéalement sous l'axe recherche/logo */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1000px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.14) 0%, rgba(59, 130, 246, 0.05) 40%, rgba(248, 250, 252, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            animation: pulseGlow 5s ease-in-out infinite alternate;
+        }
+
         /* Barre supérieure */
         .top-bar {
             width: 100%;
@@ -112,7 +127,7 @@
             margin-top: 5px;
         }
 
-        /* Barre de recherche et son conteneur */
+        /* Barre de recherche */
         .search-container {
             width: 90%;
             max-width: 650px;
@@ -120,21 +135,6 @@
             position: relative;
             animation: scaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 10;
-        }
-
-        /* NOUVEAUTÉ : La tache bleue lumineuse en arrière-plan */
-        .search-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 140%;
-            height: 350px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.04) 45%, rgba(248, 250, 252, 0) 70%);
-            border-radius: 50%;
-            z-index: -1;
-            pointer-events: none;
-            animation: pulseGlow 4s ease-in-out infinite alternate;
         }
 
         .search-wrapper {
@@ -359,14 +359,16 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
         
-        /* Respiration subtile du halo lumineux arrière-plan */
+        /* Respiration douce du halo de fond */
         @keyframes pulseGlow {
-            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.98); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); }
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.95); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
         }
     </style>
 </head>
 <body>
+
+    <div class="global-glow"></div>
 
     <div class="top-bar">
         <button class="login-btn" onclick="openAuthModal()">
@@ -384,8 +386,6 @@
     </header>
 
     <div class="search-container">
-        <div class="search-glow"></div>
-        
         <form id="search-form" onsubmit="performSearch(event)">
             <div class="search-wrapper">
                 <input type="text" id="search-query" class="search-input" placeholder="Que recherchez-vous aujourd'hui ?" required autocomplete="off">
@@ -654,7 +654,7 @@
         function closeModal(event, modalId, force = false) { if (force || event.target.id === modalId) { document.getElementById(modalId).classList.remove('active'); } }
         function handleAuthSubmit(event, type) { event.preventDefault(); alert(`Action d'${type} réussie.`); closeModal(event, 'auth-modal', true); }
 
-        // Maintient l'année de copyright à jour
+        // Met à jour l'année automatiquement
         document.getElementById('copyright-year').innerHTML = `&copy; ${new Date().getFullYear()} <strong>Franc.</strong> Tous droits réservés.`;
 
         window.onload = fetchLiveNews;
