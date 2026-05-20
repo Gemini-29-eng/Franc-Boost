@@ -180,20 +180,21 @@
 
         .search-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
 
-        /* NOUVEAUTÉ : Catégories de recherche style Google / Qwant */
+        /* CORRECTION : Masqué par défaut (display: none), apparaît après la recherche */
         .search-categories {
-            display: flex;
+            display: none; 
             justify-content: center;
             gap: 25px;
             margin-top: 15px;
             padding: 5px 10px;
             overflow-x: auto;
             white-space: nowrap;
-            scrollbar-width: none; /* Cache la barre de défilement sur Firefox */
+            scrollbar-width: none;
+            animation: fadeIn 0.4s ease forwards;
         }
 
         .search-categories::-webkit-scrollbar {
-            display: none; /* Cache la barre de défilement sur Chrome/Safari */
+            display: none;
         }
 
         .category-tab {
@@ -450,7 +451,7 @@
             </div>
         </form>
 
-        <div class="search-categories">
+        <div class="search-categories" id="search-categories-bar">
             <button class="category-tab active" onclick="switchCategory(this, 'all')"><i class="fa-solid fa-magnifying-glass"></i> Tout</button>
             <button class="category-tab" onclick="switchCategory(this, 'images')"><i class="fa-regular fa-image"></i> Images</button>
             <button class="category-tab" onclick="switchCategory(this, 'videos')"><i class="fa-solid fa-film"></i> Vidéos</button>
@@ -554,15 +555,13 @@
             { keys: ["tokyo", "tokio", "toky"], tag: "Lieu / Ville", title: "Tokyo", desc: "Capitale ultra-moderne du Japon, mêlant gratte-ciels lumineux, temples anciens et culture pop-art dynamique.", icon: "fa-torii-gate", url: "https://www.gotokyo.org/fr" }
         ];
 
-        // Gérer le changement de catégorie au clic
         function switchCategory(element, category) {
             document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
             element.classList.add('active');
             
             const query = document.getElementById('search-query').value.trim();
             if (query) {
-                // Si l'utilisateur a écrit quelque chose, on relance la recherche pour la nouvelle catégorie
-                performSearch(new Event('submit'));
+                performSearch(null);
             }
         }
 
@@ -635,10 +634,12 @@
             });
         }
 
+        // Retour à l'accueil : On masque à nouveau la barre de catégories
         function goHome() {
             document.getElementById('search-query').value = '';
             document.getElementById('results-container').innerHTML = '';
             document.getElementById('smart-preview').style.display = 'none';
+            document.getElementById('search-categories-bar').style.display = 'none'; // Re-masquage
             const newsSection = document.getElementById('news-section');
             newsSection.style.display = 'block';
             fetchLiveNews();
@@ -673,12 +674,16 @@
             const resultsContainer = document.getElementById('results-container');
             const loader = document.getElementById('loader');
             const newsSection = document.getElementById('news-section');
+            const categoriesBar = document.getElementById('search-categories-bar');
 
             if (!query) return;
 
             resultsContainer.innerHTML = '';
             loader.style.display = 'block';
             newsSection.style.display = 'none'; 
+
+            // CORRECTION : On affiche la barre d'onglets uniquement lors du chargement des résultats
+            categoriesBar.style.display = 'flex';
 
             checkSmartPreview(query);
 
@@ -729,7 +734,6 @@
         function closeModal(event, modalId, force = false) { if (force || event.target.id === modalId) { document.getElementById(modalId).classList.remove('active'); } }
         function handleAuthSubmit(event, type) { event.preventDefault(); alert(`Action d'${type} réussie.`); closeModal(event, 'auth-modal', true); }
 
-        // Maintient l'année de copyright à jour
         document.getElementById('copyright-year').innerHTML = `&copy; ${new Date().getFullYear()} <strong>Franc.</strong> Tous droits réservés.`;
 
         window.onload = fetchLiveNews;
